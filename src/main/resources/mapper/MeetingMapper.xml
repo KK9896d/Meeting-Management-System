@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.calm.mapper.MeetingMapper">
+    <resultMap id="mvo" type="com.calm.pojo.vo.MeetingVo">
+        <id column="id" property="id" javaType="int"/>
+        <result column="name" property="name" javaType="String"/>
+        <result column="room_id" property="roomId" javaType="int"/>
+        <result column="reserve_id" property="reserveId" javaType="int"/>
+        <result column="number_of_person" property="numberOfPerson" javaType="int"/>
+        <result column="start_time" property="startTime" javaType="java.util.Date"/>
+        <result column="end_time" property="endTime" javaType="java.util.Date"/>
+        <result column="reserve_time" property="reserveTime" javaType="java.util.Date"/>
+        <result column="desc" property="desc" javaType="String"/>
+        <result column="status" property="status" javaType="String"/>
+        <result column="cancel_time" property="cancelTime" javaType="java.util.Date"/>
+        <result column="cancel_reason" property="cancelReason" javaType="String"/>
+        <result column="room_name" property="roomName" javaType="String"/>
+        <result column="reserve_name" property="reserveName" javaType="String"/>
+
+    </resultMap>
+
+    <select id="getMeetingByReserveId" parameterType="int" resultMap="mvo">
+        select m.*, r.name as room_name, e.real_name as reserve_name from meeting as m
+        join room r on m.room_id = r.id
+        join employee e on m.reserve_id = e.id
+        where m.reserve_id=#{reserveId}
+    </select>
+
+    <select id="getMeetingByEmpId" parameterType="int" resultMap="mvo">
+        select m.*, r.name as room_name, e.real_name as reserve_name from meeting_employee as me
+            join meeting m on me.meeting_id = m.id
+            join room r on m.room_id = r.id
+            join employee e on m.reserve_id = e.id
+        where me.employee_id=#{empId}
+
+    </select>
+
+    <select id="getMeetingById" parameterType="int" resultMap="mvo">
+        select m.*, r.name as room_name, e.real_name as reserve_name from meeting as m
+          join room r on m.room_id = r.id
+          join employee e on m.reserve_id = e.id
+        where m.id=#{id}
+    </select>
+
+
+    <update id="cancelMeetingById">
+        update meeting set status='1',cancel_reason=#{reason},cancel_time=now()
+        where id=#{id}
+    </update>
+
+    <select id="getMeetingByMap" parameterType="java.util.Map" resultMap="mvo">
+        select m.*, r.name as room_name, e.real_name as reserve_name from meeting_employee as me
+        join meeting m on me.meeting_id = m.id
+        join room r on m.room_id = r.id
+        join employee e on m.reserve_id = e.id
+        <where>
+            <if test="name != ''">
+                m.name like concat('%', #{name}, '%')
+            </if>
+            <if test="roomName != ''">
+                and r.name like concat('%', #{roomName}, '%')
+            </if>
+            <if test="reserveName != ''">
+                and e.real_name like concat('%', #{reserveName}, '%')
+            </if>
+            <if test="reserveTimeFrom != ''">
+                and m.reserve_time > #{reserveTimeFrom}
+            </if>
+            <if test="reserveTimeTo != ''">
+                and m.reserve_time &lt; #{reserveTimeTo}
+            </if>
+            <if test="startTimeFrom != ''">
+                and m.start_time > #{startTimeFrom}
+            </if>
+            <if test="startTimeTo != ''">
+                and m.start_time &lt; #{startTimeTo}
+            </if>
+
+        </where>
+        group by m.id
+
+    </select>
+
+    <!--主键自动回填 -->
+    <insert id="addMeeting" parameterType="MeetingVo" keyProperty="id" useGeneratedKeys="true">
+        insert into meeting(name, room_id, reserve_id, number_of_person, start_time, end_time, reserve_time, `desc`, status)
+        values(#{name}, #{roomId}, #{reserveId}, #{numberOfPerson}, #{startTime}, #{endTime}, #{reserveTime}, #{desc}, #{status})
+    </insert>
+
+    <insert id="addEmpToMeeting" parameterType="MeetingVo">
+        insert into meeting_employee(meeting_id, employee_id) values
+         <foreach collection="employeeList" item="emp" separator=",">
+            (#{id}, #{emp.id})
+        </foreach>
+
+    </insert>
+
+</mapper>

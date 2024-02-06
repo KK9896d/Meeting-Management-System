@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.calm.mapper.RoomMapper">
+    <select id="getAllRoom" resultType="Room">
+        select * from room
+    </select>
+
+    <select id="getRoomById" parameterType="int" resultType="Room">
+        select * from room where id=#{id}
+    </select>
+
+    <update id="updateRoom" parameterType="Room">
+        update room set name=#{name},room_num=#{roomNum},capacity=#{capacity},`desc`=#{desc},status=#{status}
+        where id=#{id};
+    </update>
+
+    <insert id="addRoom" parameterType="Room">
+        insert into room (room_num, name, capacity, status, `desc`) value (#{roomNum}, #{name}, #{capacity}, #{status}, #{desc} )
+    </insert>
+
+</mapper>
