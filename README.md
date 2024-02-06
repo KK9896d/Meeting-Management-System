@@ -1,6 +1,3 @@
-# Meeting-Management-System
-Implement an online conference room reservation system.
-
 <h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">CalmMeeting 1.0.0</h1>
 <h4 align="center">Based on the SpringMVC + Mybatis + Freemarker framework</h4>
 
